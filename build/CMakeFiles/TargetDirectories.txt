@@ -1,0 +1,4 @@
+/home/jyang/Projects/render_kinect/build/CMakeFiles/rebuild_cache.dir
+/home/jyang/Projects/render_kinect/build/CMakeFiles/Project.dir
+/home/jyang/Projects/render_kinect/build/CMakeFiles/edit_cache.dir
+/home/jyang/Projects/render_kinect/build/CMakeFiles/render_object.dir

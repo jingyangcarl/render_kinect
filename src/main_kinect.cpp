@@ -47,31 +47,32 @@
 
 /* Sampling of random 6DoF transformations. */
 void getRandomTransform(const double &p_x,
-			const double &p_y,
-			const double &p_z,
-			const double &p_angle,
-			Eigen::Affine3d &p_tf)
+                        const double &p_y,
+                        const double &p_z,
+                        const double &p_angle,
+                        Eigen::Affine3d &p_tf)
 {
-  Eigen::Vector3d axis(((double)(rand()%1000))/1000.0,
-		       ((double)(rand()%1000))/1000.0,
-		       ((double)(rand()%1000))/1000.0);
-  Eigen::Vector3d t(p_x*(double)(rand()%2000 -1000)/1000,
-		    p_y*(double)(rand()%2000 -1000)/1000,
-		    p_z*(double)(rand()%2000 -1000)/1000);
+  Eigen::Vector3d axis(((double)(rand() % 1000)) / 1000.0,
+                       ((double)(rand() % 1000)) / 1000.0,
+                       ((double)(rand() % 1000)) / 1000.0);
+  Eigen::Vector3d t(p_x * (double)(rand() % 2000 - 1000) / 1000,
+                    p_y * (double)(rand() % 2000 - 1000) / 1000,
+                    p_z * (double)(rand() % 2000 - 1000) / 1000);
   p_tf = Eigen::Affine3d::Identity();
   p_tf.translate(t);
-  p_tf.rotate(Eigen::AngleAxisd( p_angle*(double)(rand()%2000 - 1000)/1000, axis));
+  p_tf.rotate(Eigen::AngleAxisd(p_angle * (double)(rand() % 2000 - 1000) / 1000, axis));
 }
 
-// main function that generated a number of sample outputs for a given object mesh. 
+// main function that generated a number of sample outputs for a given object mesh.
 int main(int argc, char **argv)
 {
-  
-  if(argc<2){
+
+  if (argc < 2)
+  {
     std::cerr << "Usage: " << argv[0] << " model_file.obj" << std::endl;
     exit(-1);
   }
-  
+
   // Get the path to the object mesh model.
   std::string object_models_dir = "../obj_models/";
   std::stringstream full_path;
@@ -79,15 +80,15 @@ int main(int argc, char **argv)
 
   // Get the path to the dot pattern
   std::string dot_path = "../data/kinect-pattern_3x3.png";
-  
+
   // Camera Parameters
   render_kinect::CameraInfo cam_info;
-  
+
   cam_info.width = 640;
   cam_info.height = 480;
   cam_info.cx_ = 320;
   cam_info.cy_ = 240;
-  
+
   cam_info.z_near = 0.5;
   cam_info.z_far = 6.0;
   cam_info.fx_ = 580.0;
@@ -103,7 +104,7 @@ int main(int argc, char **argv)
   // Test Transform
   Eigen::Affine3d transform(Eigen::Affine3d::Identity());
   transform.translate(Eigen::Vector3d(0.089837, -0.137769, 0.949210));
-  transform.rotate(Eigen::Quaterniond(0.906614,-0.282680,-0.074009,-0.304411));
+  transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));
 
   // Kinect Simulator
   render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
@@ -117,15 +118,15 @@ int main(int argc, char **argv)
 
   // Storage of random transform
   Eigen::Affine3d noise;
-  for(int i=0; i<frames; ++i) {
-    
+  for (int i = 0; i < frames; ++i)
+  {
+
     // sample noisy transformation around initial one
-    getRandomTransform(0.02,0.02,0.02,0.05,noise);
-    Eigen::Affine3d current_tf = noise*transform;
-    
+    getRandomTransform(0.02, 0.02, 0.02, 0.05, noise);
+    Eigen::Affine3d current_tf = noise * transform;
+
     // give pose and object name to renderer
     Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
-    
   }
 
   return 0;

@@ -59,6 +59,7 @@ namespace render_kinect {
   
   Simulate(CameraInfo &cam_info, std::string object_name, std::string dot_path) 
     : out_path_("/tmp/") 
+    // : out_path_("/home/jyang/Projects/render_kinect/bin/generated")
       {
 	// allocate memory for depth image
 	int w = cam_info.width;
