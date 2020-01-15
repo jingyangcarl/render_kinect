@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/jyang/Projects/render_kinect/src/kinectSimulator.cpp" "/home/jyang/Projects/render_kinect/build/CMakeFiles/Project.dir/src/kinectSimulator.o"
-  "/home/jyang/Projects/render_kinect/src/noiseutils.cpp" "/home/jyang/Projects/render_kinect/build/CMakeFiles/Project.dir/src/noiseutils.o"
+  "/home/ICT2000/jyang/Documents/Project/render_kinect/src/kinectSimulator.cpp" "/home/ICT2000/jyang/Documents/Project/render_kinect/build/CMakeFiles/Project.dir/src/kinectSimulator.o"
+  "/home/ICT2000/jyang/Documents/Project/render_kinect/src/noiseutils.cpp" "/home/ICT2000/jyang/Documents/Project/render_kinect/build/CMakeFiles/Project.dir/src/noiseutils.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -26,7 +26,7 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../include"
-  "/usr/local/include/eigen3"
+  "/usr/include/eigen3"
   "/usr/local/include/vtk-8.2"
   "/usr/local/include/pcl-1.9"
   "/usr/local/include"

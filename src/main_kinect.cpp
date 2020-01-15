@@ -84,17 +84,22 @@ int main(int argc, char **argv)
   // Camera Parameters
   render_kinect::CameraInfo cam_info;
 
-  cam_info.width = 640;
-  cam_info.height = 480;
-  cam_info.cx_ = 320;
-  cam_info.cy_ = 240;
+  // cam_info.width = 640;
+  // cam_info.height = 480;
+  // cam_info.cx_ = 320;
+  // cam_info.cy_ = 240;
+  cam_info.width = 1280;
+  cam_info.height = 720;
+  cam_info.cx_ = 500;
+  cam_info.cy_ = 360;
 
   cam_info.z_near = 0.5;
   cam_info.z_far = 6.0;
   cam_info.fx_ = 580.0;
   cam_info.fy_ = 580.0;
   // baseline between IR projector and IR camera
-  cam_info.tx_ = 0.075;
+  // cam_info.tx_ = 0.075;
+  cam_info.tx_ = 0.055;
 
   // Type of noise
   //  cam_info.noise_ = render_kinect::GAUSSIAN;
@@ -103,7 +108,8 @@ int main(int argc, char **argv)
 
   // Test Transform
   Eigen::Affine3d transform(Eigen::Affine3d::Identity());
-  transform.translate(Eigen::Vector3d(0.089837, -0.137769, 0.949210));
+  // transform.translate(Eigen::Vector3d(0.089837, -0.137769, 0.949210));
+  transform.translate(Eigen::Vector3d(0.0, 0.0, 0.949210));
   transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));
 
   // Kinect Simulator

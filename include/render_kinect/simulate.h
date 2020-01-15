@@ -44,6 +44,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
 #endif
 
 #include <string.h>
@@ -60,7 +61,7 @@ class Simulate
 public:
   Simulate(CameraInfo &cam_info, std::string object_name, std::string dot_path)
       // : out_path_("/tmp/")
-      : out_path_("/home/jyang/Projects/render_kinect/bin/generated/")
+      : out_path_("./generated/")
   {
     // allocate memory for depth image
     int w = cam_info.width;
@@ -121,7 +122,7 @@ public:
       lD << out_path_ << "labels" << std::setw(3) << std::setfill('0')
          << countf << ".png";
       if (cv::imwrite(lD.str().c_str(), labels_)){
-
+        std::cout << "Finished writting labels to " << lD.str() << std::endl;
       } else {
         std::cout << "Failed to write labels" << std::endl;
       }
@@ -134,7 +135,7 @@ public:
 #ifdef HAVE_PCL
       std::stringstream lD;
       lD << out_path_ << "point_cloud" << std::setw(3)
-         << std::setfill('0') << countf << ".pcd";
+         << std::setfill('0') << countf << ".ply";
 
       pcl::PointCloud<pcl::PointXYZ> cloud;
       // Fill in the cloud data
@@ -151,7 +152,7 @@ public:
         cloud.points[i].z = point[2];
       }
 
-      if (!pcl::io::savePCDFileBinary(lD.str(), cloud) != 0){
+      if (!pcl::io::savePLYFile(lD.str(), cloud) != 0){
         std::cout << "Finished writting point_cloud to " << lD.str() << std::endl;
       } else {
         std::cout << "Couldn't store point cloud at " << lD.str() << std::endl;

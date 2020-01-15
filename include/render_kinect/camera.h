@@ -44,106 +44,104 @@
 
 namespace render_kinect
 {
-  enum NoiseType
+enum NoiseType
+{
+  GAUSSIAN = 1,
+  PERLIN,
+  SIMPLEX,
+  NONE
+};
+
+class CameraInfo
+{
+public:
+  int width, height;
+  double z_near, z_far;
+  double fx_, fy_;
+  double cx_, cy_;
+  double tx_;
+
+  NoiseType noise_;
+};
+
+class Camera
+{
+public:
+  double getFx()
   {
-    GAUSSIAN=1,
-    PERLIN,
-    SIMPLEX,
-    NONE
-  };
-  
-  class CameraInfo
+    return info_.fx_;
+  }
+
+  double getFy()
   {
-  public:
+    return info_.fy_;
+  }
 
-    int width, height;
-    double z_near, z_far;
-    double fx_, fy_;
-    double cx_, cy_;
-    double tx_;
-
-    NoiseType noise_;
-  };
-
-  class Camera
+  double getCx()
   {
-  public:
-    
-    double getFx()
-    {
-      return info_.fx_;
-    }
+    return info_.cx_;
+  }
 
-    double getFy()
-    {
-      return info_.fy_;
-    }
+  double getCy()
+  {
+    return info_.cy_;
+  }
 
-    double getCx()
-    {
-      return info_.cx_;
-    }
+  int getWidth()
+  {
+    return info_.width;
+  }
 
-    double getCy()
-    {
-      return info_.cy_;
-    }
+  int getHeight()
+  {
+    return info_.height;
+  }
 
-    int getWidth()
-    {
-      return info_.width;
-    }
+  double getZNear()
+  {
+    return info_.z_near;
+  }
 
-    int getHeight()
-    {
-      return info_.height;
-    }
+  double getZFar()
+  {
+    return info_.z_far;
+  }
 
-    double getZNear()
-    {
-      return info_.z_near;
-    }
+  double getTx()
+  {
+    return info_.tx_;
+  }
 
-    double getZFar()
-    {
-      return info_.z_far;
-    }
-
-    double getTx() 
-    {
-      return info_.tx_;
-    }
-
-    
   Camera(const CameraInfo p_info)
-    : info_(p_info) {}
-    
-    // two functions adopted from ros::image_geometry::PinholeCameraModel
-    cv::Point2d project3dToPixel(const cv::Point3d& xyz) const
-      {
-	
-	// [U V W]^T = P * [X Y Z 1]^T
-	// u = U/W
-	// v = V/W
-	cv::Point2d uv_rect;
-	uv_rect.x = (info_.fx_*xyz.x) / xyz.z + info_.cx_;
-	uv_rect.y = (info_.fy_*xyz.y) / xyz.z + info_.cy_;
-	return uv_rect;
-      }
+      : info_(p_info) {}
 
-    cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect) const
-      {
-	cv::Point3d ray;
-	ray.x = (uv_rect.x - info_.cx_) / info_.fx_;
-	ray.y = (uv_rect.y - info_.cy_) / info_.fy_;
-	ray.z = 1.0;
-	return ray;
-      }
+  // two functions adopted from ros::image_geometry::PinholeCameraModel
+  // http://docs.ros.org/melodic/api/image_geometry/html/c++/classimage__geometry_1_1PinholeCameraModel.html
+  cv::Point2d project3dToPixel(const cv::Point3d &xyz) const
+  {
 
-  private:
-    CameraInfo info_;
-  };
- 
+    // [U V W]^T = P * [X Y Z 1]^T
+    // u = U/W
+    // v = V/W
+    cv::Point2d uv_rect;
+    uv_rect.x = (info_.fx_ * xyz.x) / xyz.z + info_.cx_;
+    uv_rect.y = (info_.fy_ * xyz.y) / xyz.z + info_.cy_;
+    return uv_rect;
+  }
+
+  cv::Point3d projectPixelTo3dRay(const cv::Point2d &uv_rect) const
+  {
+    cv::Point3d ray;
+    ray.x = (uv_rect.x - info_.cx_) / info_.fx_;
+    ray.y = (uv_rect.y - info_.cy_) / info_.fy_;
+    ray.z = 1.0;
+    return ray;
+  }
+
+private:
+  CameraInfo info_;
+};
+
 } // namespace render_kinect
 
 #endif // KINECT_SIM_CAMERA_H_

@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/jyang/Projects/render_kinect/src/main_kinect.cpp" "/home/jyang/Projects/render_kinect/build/CMakeFiles/render_object.dir/src/main_kinect.o"
+  "/home/ICT2000/jyang/Documents/Project/render_kinect/src/main_kinect.cpp" "/home/ICT2000/jyang/Documents/Project/render_kinect/build/CMakeFiles/render_object.dir/src/main_kinect.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -25,7 +25,7 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../include"
-  "/usr/local/include/eigen3"
+  "/usr/include/eigen3"
   "/usr/local/include/vtk-8.2"
   "/usr/local/include/pcl-1.9"
   "/usr/local/include"
@@ -35,7 +35,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/jyang/Projects/render_kinect/build/CMakeFiles/Project.dir/DependInfo.cmake"
+  "/home/ICT2000/jyang/Documents/Project/render_kinect/build/CMakeFiles/Project.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.
