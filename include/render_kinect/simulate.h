@@ -59,8 +59,13 @@ namespace render_kinect
 class Simulate
 {
 public:
+
+  KinectSimulator *object_model_;
+  cv::Mat depth_im_, scaled_im_, point_cloud_, labels_;
+  std::string out_path_;
+  Eigen::Affine3d transform_;
+
   Simulate(CameraInfo &cam_info, std::string object_name, std::string dot_path)
-      // : out_path_("/tmp/")
       : out_path_("./generated/")
   {
     // allocate memory for depth image
@@ -69,9 +74,7 @@ public:
 
     depth_im_ = cv::Mat(h, w, CV_32FC1);
     scaled_im_ = cv::Mat(h, w, CV_32FC1);
-
     object_model_ = new KinectSimulator(cam_info, object_name, dot_path);
-
     transform_ = Eigen::Affine3d::Identity();
   }
 
@@ -163,11 +166,6 @@ public:
 #endif
     }
   }
-
-  KinectSimulator *object_model_;
-  cv::Mat depth_im_, scaled_im_, point_cloud_, labels_;
-  std::string out_path_;
-  Eigen::Affine3d transform_;
 };
 
 } //namespace render_kinect

@@ -79,7 +79,7 @@ int main(int argc, char **argv)
   full_path << object_models_dir << argv[1];
 
   // Get the path to the dot pattern
-  std::string dot_path = "../data/kinect-pattern_3x3.png";
+  std::string dot_path = "../data/kinect-pattern_3x3_.png";
 
   // Camera Parameters
   render_kinect::CameraInfo cam_info;
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
   // cam_info.cy_ = 240;
   cam_info.width = 1280;
   cam_info.height = 720;
-  cam_info.cx_ = 500;
+  cam_info.cx_ = 640;
   cam_info.cy_ = 360;
 
   cam_info.z_near = 0.5;
@@ -102,9 +102,9 @@ int main(int argc, char **argv)
   cam_info.tx_ = 0.055;
 
   // Type of noise
-  //  cam_info.noise_ = render_kinect::GAUSSIAN;
-  //  cam_info.noise_ = render_kinect::PERLIN;
-  cam_info.noise_ = render_kinect::NONE;
+  cam_info.noise_ = render_kinect::GAUSSIAN;
+  // cam_info.noise_ = render_kinect::PERLIN;
+  // cam_info.noise_ = render_kinect::NONE;
 
   // Test Transform
   Eigen::Affine3d transform(Eigen::Affine3d::Identity());
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
   render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
 
   // Number of samples
-  int frames = 10;
+  int frames = 1;
   // Flags for what output data should be generated
   bool store_depth = 1;
   bool store_label = 1;
@@ -129,7 +129,8 @@ int main(int argc, char **argv)
 
     // sample noisy transformation around initial one
     getRandomTransform(0.02, 0.02, 0.02, 0.05, noise);
-    Eigen::Affine3d current_tf = noise * transform;
+    Eigen::Affine3d current_tf = transform;
+    // Eigen::Affine3d current_tf = noise * transform;
 
     // give pose and object name to renderer
     Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);

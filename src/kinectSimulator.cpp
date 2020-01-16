@@ -69,8 +69,9 @@
 #include <omp.h>
 #endif
 
-//static unsigned countf = 0;
-//static const int prec = 5;
+// For DEBUG purpose
+static unsigned countf = 0;
+static const int prec = 3;
 
 namespace render_kinect
 {
@@ -79,7 +80,7 @@ namespace render_kinect
 KinectSimulator::KinectSimulator(const CameraInfo &p_camera_info,
 								 std::string object_name,
 								 std::string dot_path)
-	: camera_(p_camera_info), noise_type_(p_camera_info.noise_), noise_gen_(NULL), noisy_labels_(0)
+	: camera_(p_camera_info), noise_type_(p_camera_info.noise_), noise_gen_(NULL), noisy_labels_(1)
 {
 
 	std::cout << "Width and Height: " << p_camera_info.width << "x"
@@ -318,13 +319,27 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 		}				  // camera_.getHeight()
 	}					  // camera_.getWidth()
 
+	// CARL: TODO
+	// add code here to read disparity image to disp;
+	cv::Mat dispBuffer(1280, 720, CV_32FC1);
+	dispBuffer = cv::imread("/home/ICT2000/jyang/Documents/Project/Blender/CameraStage/Camera Stage V2.1/model/1280_720_16cam_depth/D415.IR.L.R(+22.5d).up.png", cv::IMREAD_GRAYSCALE);
+	cv::bitwise_not(dispBuffer, dispBuffer);
+	// cv::normalize(dispBuffer, dispBuffer, 0, 1);
+	dispBuffer.convertTo(disp, CV_32FC1, 1.0/255.0);
+	
+	// for (int i = 0; i < disp.size().height(); i++){
+	// 	for (int j = 0; j < disp.size().width(); j++){
+	// 		disp[i][j] = 1.88 / (55.0 * disp[i][j]);
+	// 	}
+	// }
+
 	// Filter disparity image and add noise
 	cv::Mat out_disp, out_labels;
 	filterDisp(disp, labels, out_disp, out_labels);
 	if (noisy_labels_)
 		labels = out_labels;
 
-	//Go over disparity image and recompute depth map and point cloud after filtering and adding noise etc
+	// Go over disparity image and recompute depth map and point cloud after filtering and adding noise etc
 	for (int r = 0; r < camera_.getHeight(); ++r)
 	{
 		float *disp_i = out_disp.ptr<float>(r);
@@ -364,10 +379,17 @@ void KinectSimulator::filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv:
 		noise_gen_->generateNoiseField(noise_field);
 
 	//DEBUG
-	//countf++;
-	//std::stringstream lS;
-	//lS << "/tmp/noise"<< std::setw(prec) << std::setfill('0') << countf << ".png";
-	//cv::imwrite(lS.str().c_str(), (noise_field+1)*128);
+	countf++;
+	std::stringstream lS;
+	lS << "./generated/noise" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	cv::imwrite(lS.str().c_str(), (noise_field + 1) * 128);
+	std::stringstream ss;
+	ss.str("");
+	ss << "./generated/labels_beforeFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	cv::imwrite(ss.str().c_str(), labels);
+	ss.str("");
+	ss << "./generated/disp_beforeFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	cv::imwrite(ss.str().c_str(), disp);
 
 	// mysterious parameter
 	float noise_smooth = 1.5;
@@ -474,6 +496,13 @@ void KinectSimulator::filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv:
 			}
 		}
 	}
+
+	ss.str("");
+	ss << "./generated/labels_afterFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	cv::imwrite(ss.str().c_str(), out_labels);
+	ss.str("");
+	ss << "./generated/disp_afterFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	cv::imwrite(ss.str().c_str(), out_disp);
 }
 
 } //namespace render_kinect
