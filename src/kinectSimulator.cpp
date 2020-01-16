@@ -323,15 +323,19 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 	// add code here to read disparity image to disp;
 	cv::Mat dispBuffer(1280, 720, CV_32FC1);
 	dispBuffer = cv::imread("/home/ICT2000/jyang/Documents/Project/Blender/CameraStage/Camera Stage V2.1/model/1280_720_16cam_depth/D415.IR.L.R(+22.5d).up.png", cv::IMREAD_GRAYSCALE);
+// #define FLIP_WHITE_BLACK
+#ifdef FLIP_WHITE_BLACK
 	cv::bitwise_not(dispBuffer, dispBuffer);
-	// cv::normalize(dispBuffer, dispBuffer, 0, 1);
-	dispBuffer.convertTo(disp, CV_32FC1, 1.0/255.0);
-	
-	// for (int i = 0; i < disp.size().height(); i++){
-	// 	for (int j = 0; j < disp.size().width(); j++){
-	// 		disp[i][j] = 1.88 / (55.0 * disp[i][j]);
-	// 	}
-	// }
+	double min(0), max(0);
+	cv::minMaxLoc(dispBuffer, &min, &max);
+	dispBuffer.convertTo(dispBuffer, CV_32FC1, 1.0, -min);
+	dispBuffer.convertTo(disp, CV_32FC1, 255.0/(max-min));
+#else
+	// double min(0), max(0);
+	// cv::minMaxLoc(dispBuffer, &min, &max);
+	// dispBuffer.convertTo(dispBuffer, CV_32FC1, 1.0, -min);
+	dispBuffer.convertTo(disp, CV_32FC1, 1.0);
+#endif
 
 	// Filter disparity image and add noise
 	cv::Mat out_disp, out_labels;
