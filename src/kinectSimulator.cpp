@@ -322,13 +322,20 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 
 	// CARL: TODO
 	// add code here to read disparity image to disp;
-	cv::Mat depthMap(1280, 720, CV_32FC1);
-	depthMap = cv::imread("/home/ICT2000/jyang/Documents/Project/Blender/CameraStage/Camera Stage V2.1/model/1280_720_16cam_depth/D415.RGB.R(+22.5d).up.png", cv::IMREAD_GRAYSCALE);
-	
-	cv::Mat dispMap(depthMap.size(), CV_32FC1);
-	cv::bitwise_not(depthMap, dispMap);
 	double min(0), max(0);
+	cv::Mat depthMap(1280, 720, CV_32FC1);
+	cv::Mat dispMap(depthMap.size(), CV_32FC1);
+	depthMap = cv::imread("/home/ICT2000/jyang/Documents/Project/Blender/CameraStage/Camera Stage V2.1/model/1280_720_16cam_depth/D415.RGB.R(+22.5d).up.png", cv::IMREAD_GRAYSCALE);
+	cv::bitwise_not(depthMap, dispMap);
+
+	cv::minMaxLoc(depthMap, &min, &max);
+	std::cout << "depthMap: " << min << " " << max << std::endl;
+	depthMap.convertTo(depthMap, CV_32FC1, 1.0, -min);
+	depthMap.convertTo(depthMap, CV_32FC1, 1.0/(max - min));	// depthMap ranges in [0 1];
+	depthMap.convertTo(depthMap, CV_32FC1, invalid_disp_);
+
 	cv::minMaxLoc(dispMap, &min, &max);
+	std::cout << "dispMap: " << min << " " << max << std::endl;
 	dispMap.convertTo(dispMap, CV_32FC1, 1.0, -min);
 	dispMap.convertTo(dispMap, CV_32FC1, 1.0/(max - min)); // dispMap ranges in [0 1];
 	dispMap.convertTo(disp, CV_32FC1, 255.0);
@@ -342,7 +349,7 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 	// depthMap.convertTo(depthMap, CV_32FC1, 1.0, -min);
 	// depthMap.convertTo(disp, CV_32FC1, 255.0/(max-min));
 #else
-	// depthMap.convertTo(disp, CV_32FC1, 1.0);
+	depthMap.convertTo(disp, CV_32FC1, 1.0);
 #endif
 
 	countf++;
