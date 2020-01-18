@@ -140,6 +140,7 @@ KinectSimulator::KinectSimulator(const CameraInfo &p_camera_info,
 		//Gaussian Noise
 		float mean = 0.0;
 		float std = 0.15;
+		// float std = 1.0;
 		noise_gen_ = new GaussianNoise(camera_.getWidth(), camera_.getHeight(), mean, std);
 	}
 	else if (noise_type_ == PERLIN)
@@ -322,7 +323,8 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 	// CARL: TODO
 	// add code here to read disparity image to disp;
 	cv::Mat dispBuffer(1280, 720, CV_32FC1);
-	dispBuffer = cv::imread("/home/ICT2000/jyang/Documents/Project/Blender/CameraStage/Camera Stage V2.1/model/1280_720_16cam_depth/D415.IR.L.R(+22.5d).up.png", cv::IMREAD_GRAYSCALE);
+	dispBuffer = cv::imread("/home/ICT2000/jyang/Documents/Project/Blender/CameraStage/Camera Stage V2.1/model/1280_720_16cam_depth/D415.RGB.R(+22.5d).up.png", cv::IMREAD_GRAYSCALE);
+
 // #define FLIP_WHITE_BLACK
 #ifdef FLIP_WHITE_BLACK
 	cv::bitwise_not(dispBuffer, dispBuffer);
@@ -331,10 +333,11 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 	dispBuffer.convertTo(dispBuffer, CV_32FC1, 1.0, -min);
 	dispBuffer.convertTo(disp, CV_32FC1, 255.0/(max-min));
 #else
-	// double min(0), max(0);
-	// cv::minMaxLoc(dispBuffer, &min, &max);
-	// dispBuffer.convertTo(dispBuffer, CV_32FC1, 1.0, -min);
-	dispBuffer.convertTo(disp, CV_32FC1, 1.0);
+	// dispBuffer.convertTo(disp, CV_32FC1, 1.0);
+	double min(0), max(0);
+	cv::minMaxLoc(dispBuffer, &min, &max);
+	dispBuffer.convertTo(dispBuffer, CV_32FC1, 1.0, -min);
+	dispBuffer.convertTo(disp, CV_32FC1, invalid_disp_/(max-min));
 #endif
 
 	// Filter disparity image and add noise
@@ -366,6 +369,11 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 			}
 		}
 	}
+
+	std::stringstream ss;
+	ss << "./generated/depth_map" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	cv::imwrite(ss.str().c_str(), depth_map);
+
 	point_cloud = cv::Mat(vec).reshape(1).clone();
 }
 
@@ -385,22 +393,26 @@ void KinectSimulator::filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv:
 	//DEBUG
 	countf++;
 	std::stringstream lS;
-	lS << "./generated/noise" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	lS << "./generated/noise" << std::setw(prec) << std::setfill('0') << countf << ".tiff";
 	cv::imwrite(lS.str().c_str(), (noise_field + 1) * 128);
 	std::stringstream ss;
 	ss.str("");
 	ss << "./generated/labels_beforeFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".png";
 	cv::imwrite(ss.str().c_str(), labels);
 	ss.str("");
-	ss << "./generated/disp_beforeFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	ss << "./generated/disp_beforeFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".tiff";
 	cv::imwrite(ss.str().c_str(), disp);
 
 	// mysterious parameter
-	float noise_smooth = 1.5;
+	// float noise_smooth = 1.5;
+	float noise_smooth = 1.0;
 
 	// initialise output arrays
 	out_disp = cv::Mat(disp.rows, disp.cols, disp.type());
 	out_disp.setTo(invalid_disp_);
+
+	double invalid_disp_threshold = 0.8;
+
 	if (noisy_labels_)
 	{
 		out_labels = cv::Mat(labels.rows, labels.cols, labels.type());
@@ -429,14 +441,14 @@ void KinectSimulator::filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv:
 		// window shifting over disparity image
 		for (unsigned c = 0; c < lim_cols; ++c)
 		{
-			if (dots_i[c + center] > 0 && disp_i[c + center] < invalid_disp_)
+			if (dots_i[c + center] > 0 && disp_i[c + center] < invalid_disp_threshold * invalid_disp_)
 			{
 				cv::Rect roi = cv::Rect(c, r, size_filt_, size_filt_);
 				cv::Mat window = disp(roi);
 				cv::Mat dot_win = dot_pattern_(roi);
 				// check if we are at a occlusion boundary without valid disparity values
 				// return value not binary but between 0 or 255
-				cv::Mat valid_vals = (window < invalid_disp_);
+				cv::Mat valid_vals = (window < invalid_disp_threshold * invalid_disp_);
 				cv::Mat valid_dots;
 				cv::bitwise_and(valid_vals, dot_win, valid_dots);
 				cv::Scalar n_valids = cv::sum(valid_dots) / 255.0;
@@ -461,7 +473,7 @@ void KinectSimulator::filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv:
 					if (n_valids(0) > n_thresh(0) / 1.5)
 					{
 						float accu = window.at<float>(center, center);
-						assert(accu < invalid_disp_);
+						// assert(accu < invalid_disp_);
 						out_disp_i[c + center] = round((accu + noise_i[(int)((c + center) / noise_smooth)]) * 8.0) / 8.0;
 						if (noisy_labels_)
 						{
@@ -477,7 +489,7 @@ void KinectSimulator::filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv:
 							label_data_window = out_labels(roi);
 						cv::Mat substitutes = interpolation_window < fill_weights_;
 						fill_weights_.copyTo(interpolation_window, substitutes);
-						disp_data_window.setTo(out_disp_i[c + center], substitutes);
+						// disp_data_window.setTo(out_disp_i[c + center], substitutes);
 
 						if (noisy_labels_)
 						{
@@ -505,7 +517,7 @@ void KinectSimulator::filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv:
 	ss << "./generated/labels_afterFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".png";
 	cv::imwrite(ss.str().c_str(), out_labels);
 	ss.str("");
-	ss << "./generated/disp_afterFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".png";
+	ss << "./generated/disp_afterFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".tiff";
 	cv::imwrite(ss.str().c_str(), out_disp);
 }
 
