@@ -78,7 +78,7 @@ namespace render_kinect
     void filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv::Mat &out_disp, cv::Mat& out_labels);
     
     // filter masks 
-    static const int size_filt_ = 8;
+    static const int size_filt_ = 15;
     cv::Mat weights_;
     cv::Mat fill_weights_;
     

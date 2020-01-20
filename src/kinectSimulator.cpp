@@ -325,33 +325,24 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 	double min(0), max(0);
 	cv::Mat depthMap(1280, 720, CV_32FC1);
 	cv::Mat dispMap(depthMap.size(), CV_32FC1);
-	depthMap = cv::imread("/home/ICT2000/jyang/Documents/Project/Blender/CameraStage/Camera Stage V2.1/model/1280_720_16cam_depth/D415.RGB.R(+22.5d).up.png", cv::IMREAD_GRAYSCALE);
-	cv::bitwise_not(depthMap, dispMap);
+	depthMap = cv::imread("/home/ICT2000/jyang/Documents/Project/Blender/CameraStage/rendered/1280_720_16cam_depth_min_0_max_4/D415.01.IR.L.png", cv::IMREAD_GRAYSCALE);
+	depthMap.convertTo(depthMap, CV_32FC1, 1.0);
 
+	// convert depthmap to disparity map
+	double focalLength = 0.00188f;
+	dispMap = (focalLength * camera_.getTx()) / depthMap;
+
+	// output range
 	cv::minMaxLoc(depthMap, &min, &max);
 	std::cout << "depthMap: " << min << " " << max << std::endl;
-	depthMap.convertTo(depthMap, CV_32FC1, 1.0, -min);
-	depthMap.convertTo(depthMap, CV_32FC1, 1.0/(max - min));	// depthMap ranges in [0 1];
-	depthMap.convertTo(depthMap, CV_32FC1, invalid_disp_);
-
 	cv::minMaxLoc(dispMap, &min, &max);
 	std::cout << "dispMap: " << min << " " << max << std::endl;
-	dispMap.convertTo(dispMap, CV_32FC1, 1.0, -min);
-	dispMap.convertTo(dispMap, CV_32FC1, 1.0/(max - min)); // dispMap ranges in [0 1];
-	dispMap.convertTo(disp, CV_32FC1, 255.0);
-	// dispMap.convertTo(disp, CV_32FC1, invalid_disp_); // dispMap ranges in [0 invalid_disp_]
 
-// #define FLIP_WHITE_BLACK
-#ifdef FLIP_WHITE_BLACK
-	// cv::bitwise_not(depthMap, depthMap);
-	// double min(0), max(0);
-	// cv::minMaxLoc(depthMap, &min, &max);
-	// depthMap.convertTo(depthMap, CV_32FC1, 1.0, -min);
-	// depthMap.convertTo(disp, CV_32FC1, 255.0/(max-min));
-#else
-	depthMap.convertTo(disp, CV_32FC1, 1.0);
-#endif
+	// replace original disp
+	double scalar = 16.0; // this scalar and size_filt_ controls the noise;
+	dispMap.convertTo(disp, CV_32FC1, invalid_disp_ * scalar); // dispMap ranges in [0 invalid_disp_]
 
+	// save the image
 	countf++;
 	std::stringstream ss;
 	ss.str("");
@@ -360,6 +351,9 @@ void KinectSimulator::intersect(const Eigen::Affine3d &p_transform,
 	ss.str("");
 	ss << "./generated/depth_beforeFilterDisp" << std::setw(prec) << std::setfill('0') << countf << ".tiff";
 	cv::imwrite(ss.str().c_str(), depthMap);
+
+	// CARL: TODOEND
+	
 
 	// Filter disparity image and add noise
 	cv::Mat out_disp, out_labels;
@@ -420,7 +414,7 @@ void KinectSimulator::filterDisp(const cv::Mat &disp, const cv::Mat &labels, cv:
 	out_disp = cv::Mat(disp.rows, disp.cols, disp.type());
 	out_disp.setTo(invalid_disp_);
 
-	double invalid_disp_threshold = 1.0;
+	double invalid_disp_threshold = 0.8;
 
 	if (noisy_labels_)
 	{

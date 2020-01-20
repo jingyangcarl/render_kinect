@@ -1,0 +1,24 @@
+clear all;
+close all;
+
+disp_beforeFilterDisp001 = imread('disp_beforeFilterDisp001.tiff');
+depth_beforeFilterDisp001 = imread('depth_beforeFilterDisp001.tiff');
+disp_afterFilterDisp001 = imread('disp_afterFilterDisp001.tiff');
+
+disp_beforeFilterDisp001_rescale = rescale(disp_beforeFilterDisp001);
+depth_beforeFilterDisp001_rescale = rescale(depth_beforeFilterDisp001);
+disp_afterFilterDisp001_rescale = rescale(disp_afterFilterDisp001);
+disp_afterFilterDisp001_synthesis = depth_beforeFilterDisp001_rescale - 0.5 .* disp_afterFilterDisp001_rescale;
+
+subplot(2, 2, 1);
+imshow(disp_beforeFilterDisp001_rescale);
+title('disp\_beforeFilterDisp001');
+subplot(2, 2, 2);
+imshow(depth_beforeFilterDisp001_rescale);
+title('depth\_beforeFilterDisp001');
+subplot(2, 2, 3);
+imshow(rescale(disp_afterFilterDisp001));
+title('disp\_afterFilterDisp001');
+subplot(2, 2, 4);
+imshow(disp_afterFilterDisp001_synthesis);
+title('disp\_afterFilterDisp001\_synthesis');
